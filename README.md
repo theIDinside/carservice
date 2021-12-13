@@ -13,6 +13,11 @@ After you've installed nodejs and npm, from the command line / prompt / shell of
 
 This will install the yarn package manager.
 
+# Using MongoDB as backing storage
+
+You can skip this step if you don't want to use MongoDB as backing storage, the application will instead use an in memory database (non-persistent)
+if it can't connect to a local instance of a MongoDB server.
+
 After that, go to MongoDB and choose the download & install path for the platform your on. Instructions for installing is pretty easy,
 no special steps are required, just download the installer (if you're on windows) and run it and keep all the default settings.
 
@@ -36,10 +41,9 @@ For instance, if you want the database files to be stored in a folder named `mdb
 
 - From the command line / your shell of choice, go to the folder `frontend/` and type `yarn` - this will install all the required packages.
 - From the command line / your shell of choice, go to the folder `backend/` and type `yarn` - this will install all the required packages.
-- Start the MongoDB daemon (as described above)
+- Start the MongoDB daemon as described above, if you want MongoDB as backing storage, otherwise it will use an InMemory database (non-persistent)
 
 When you've done that, open up a shell and go to the folder `frontend/` and type `yarn serve`, this will spin up a web server for the frontend.
 Open up another shell, go to the `backend/` folder and type `node index.js` which will start the backend server, which the front end communicates with.
-The backend is responsible for communicating with MongoDB.
 
 Once this is done, open a web browser and go to http://localhost:8080
