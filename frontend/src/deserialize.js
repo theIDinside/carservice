@@ -133,7 +133,5 @@ function deserializeVehicleData(data) {
 }
 
 module.exports = {
-  processInput: tokenizeInput,
-  process_line: tokenize_line,
   deserializeVehicleData,
 };
