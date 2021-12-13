@@ -7,17 +7,22 @@ exception that, if the backend dies - so does the data. But seeing as how this i
 
 Required tools to install:
 
+- [node & npm](https://nodejs.org/en/download/)
 - yarn package manager (possibly might work using just `npm install`)
+
+Download the nodejs & npm installer for the platform you are on and install it. NPM will be used to install yarn as a package manager.
+
+After you've installed nodejs and npm, from the command line / prompt / shell of choice type:
+`npm install -g yarn`
+
+This will install the yarn package manager.
 
 ## Usage
 
-- From the command line / your shell of choice, go to the folder `frontend/` and type `yarn` - this will install all the required packages.
-- From the command line / your shell of choice, go to the folder `backend/` and type `yarn` - this will install all the required packages.
-
-If you have node & npm installed, installing yarn is easy, just type `npm install -g yarn` from your shell / command line / command prompt.
+- From the command line / your shell of choice, go to the folder `frontend/` and type `yarn` - this will install all the required packages for the frontend
+- From the command line / your shell of choice, go to the folder `backend/` and type `yarn` - this will install all the required packages for the backend
 
 When you've done that, open up a shell and go to the folder `frontend/` and type `yarn serve`, this will spin up a web server for the frontend.
 Open up another shell, go to the `backend/` folder and type `node index.js` which will start the backend server, which the front end communicates with.
-The backend is responsible for communicating with MongoDB.
 
 Once this is done, open a web browser and go to http://localhost:8080
