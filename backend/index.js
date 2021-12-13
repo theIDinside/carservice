@@ -4,7 +4,6 @@ const cors = require("cors");
 require("dotenv").config();
 const vehicles = require("./src/controller/vehicles");
 const app = express();
-const db = require("./src/models/index");
 // parse application/json
 app.use(bodyParser.json());
 
