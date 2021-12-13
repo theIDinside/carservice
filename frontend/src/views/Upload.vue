@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import deserialize from "@/deserialize"
+import {deserializeVehicleData} from "@/deserialize"
 export default {
   name: "Upload",
   components: {
@@ -29,7 +29,7 @@ export default {
       evt.preventDefault();
       let fd = new FormData(evt.target);
       fd.get("contents").text().then(textContents => {
-        let parsedData = deserialize.deserializeVehicleData(textContents);
+        let parsedData = deserializeVehicleData(textContents);
         const contents = {
           contents: parsedData.res
         };
@@ -64,5 +64,9 @@ export default {
 
 #besiktningform textarea {
   min-width: 1000px;
+}
+
+#uploadResponse {
+  padding: 10px;
 }
 </style>

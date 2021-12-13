@@ -36,38 +36,9 @@
 
 <script>
 const SORT_ORDER = {
-  DESCENDING: 1,
-  ASCENDING: -1,
+  ASCENDING: 1,
+  DESCENDING: -1,
 };
-
-const SORT_FN = [
-    // sort by previous inspection
-  [(a, b) => {
-    if (a.prevInspection == b.prevInspection) {
-      return a.nextInspection >= b.nextInspection;
-    }
-    return a.prevInspection < b.prevInspection;
-  },
-  (a, b) => {
-    if (a.prevInspection == b.prevInspection) {
-      return a.nextInspection <= b.nextInspection;
-    }
-    return a.prevInspection > b.prevInspection;
-  }],
-  // sort by next inspection
-  [(a, b) => {
-    if (a.nextInspection == b.nextInspection) {
-      return a.prevInspection >= b.prevInspection;
-    }
-    return a.nextInspection < b.nextInspection;
-  },
-  (a, b) => {
-    if (a.nextInspection == b.nextInspection) {
-      return a.prevInspection <= b.prevInspection;
-    }
-    return a.nextInspection > b.nextInspection;
-  }],
-];
 
 export default {
   name: "ListVehicles",
@@ -76,7 +47,7 @@ export default {
   },
   async created() {
     this.loading = true;
-    await this.getVehicleList();
+    await this.populateInspectionList();
   },
   data() {
     return {
@@ -87,10 +58,10 @@ export default {
     };
   },
   watch: {
-    $route: "getVehicleList",
+    $route: "populateInspectionList",
   },
   methods: {
-    async getVehicleList() {
+    async populateInspectionList() {
       this.error = this.vehicles = null;
       this.loading = true;
       fetch("http://localhost:8000/api/vehicles/getInspectionList")
@@ -112,13 +83,30 @@ export default {
     },
     sortBy(columnIndex) {
       this.sort[columnIndex] *= -1;
+      let modifier = this.sort[columnIndex];
+      const SORT_FNS = [
+          // sort by previous inspection
+        (a, b) => {
+          if (a.prevInspection == b.prevInspection) {
+            return (a.nextInspection - b.nextInspection);
+          }
+          return (a.prevInspection - b.prevInspection) * modifier;
+        },
+        // sort by next inspection
+        (a, b) => {
+          if (a.nextInspection == b.nextInspection) {
+            return a.prevInspection - b.prevInspection;
+          }
+          return (a.nextInspection - b.nextInspection) * modifier;
+        },
+      ];
       switch (this.sort[columnIndex]) {
-        case SORT_ORDER.DESCENDING:
-          this.vehicles = this.vehicles.sort(SORT_FN[columnIndex][1]);
-          break;
-        case SORT_ORDER.ASCENDING:
-          this.vehicles = this.vehicles.sort(SORT_FN[columnIndex][0]);
-          break;
+        case SORT_ORDER.DESCENDING: {
+          this.vehicles = this.vehicles.sort(SORT_FNS[columnIndex]);
+        } break;
+        case SORT_ORDER.ASCENDING: {
+          this.vehicles = this.vehicles.sort(SORT_FNS[columnIndex]);
+        } break;
       }
     }
   }
@@ -176,10 +164,6 @@ th,
 td {
   min-width: 120px;
   padding: 10px 20px;
-}
-
-td:hover {
-
 }
 
 th.active {
