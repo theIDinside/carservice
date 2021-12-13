@@ -19,7 +19,7 @@ db.mongoose
   .connect(process.env.MDBURI || "mongodb://localhost:27017/carservice", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 30000, // om vi inte lyckas ansluta inom 3 sek, kör fallback case med inmemory database
+    serverSelectionTimeoutMS: 3000, // om vi inte lyckas ansluta inom 3 sek, kör fallback case med inmemory database
   })
   .then(() => {
     console.log("Ansluten till MongoDB: OK!");
