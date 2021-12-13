@@ -1,15 +1,11 @@
 // Typ... REST api / end points. skulle kunna kalla det för "funktioner" också eller methods. Dvs, client application anropar dessa endpoints
 // och vi ger tillbaka den datan som efterfrågas. Dessa funktioner exponeras sedan till backend servern
-const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
-
-// importera modellen vi definerat i models/vehicle.js
-const db = require("../models");
-const Vehicle = db.vehicle;
+let database;
 
 function getInspectionList(request, response) {
-  db.vehicle.find({}).then((collection) => {
+  database.getAll().then((collection) => {
     const responseData = collection.map((vehicle) => {
       return {
         chassi: vehicle.chassiSerialNumber,
@@ -32,7 +28,7 @@ async function uploadInspectionData(request, response) {
   let updated = 0;
   let created = 0;
   for (let vehicle of request.body.contents) {
-    const item = await db.vehicle.findById(vehicle.identity);
+    const item = await database.findById(vehicle.identity);
     if (!item) {
       newvehicles.push({
         _id: vehicle.identity,
@@ -49,37 +45,23 @@ async function uploadInspectionData(request, response) {
         monthRegistration: vehicle.monthRegistration,
       });
     } else {
-      await item
-        .updateOne({
-          $set: {
-            _id: vehicle.identity,
-            chassiSerialNumber: vehicle.chassi,
-            yearModel: vehicle.model,
-            typeApproval: vehicle.approval,
-            firstRegistration: vehicle.firstRegistration,
-            privateImport: vehicle.privateImport,
-            deregistrationDate: vehicle.deregistered,
-            color: vehicle.color,
-            prevInspection: vehicle.prevInspection,
-            nextInspection: vehicle.nextInspection,
-            previousRegistration: vehicle.prevRegistration,
-            monthRegistration: vehicle.monthRegistration,
-          },
-        })
-        .then((r) => {
-          if (r.modifiedCount != 0) updated++;
-        });
+      await database.update(vehicle).then((updateCount) => {
+        if (updateCount != 0) updated++;
+      });
     }
   }
 
-  await Vehicle.insertMany(newvehicles)
-    .then((r) => {
-      created += r.length;
+  await database
+    .insertMany(newvehicles)
+    .then((insertCount) => {
+      created += insertCount;
     })
     .catch((err) => {
       console.log(`Failed to create documents: ${err}`);
     });
-
+  console.log(
+    `Nya fordon: ${created} registrerade. Updaterade fordon: ${updated}`
+  );
   response.json({
     message: `Besiktningsdata hanterad. Nya fordon: ${created}. Updaterade fordon: ${updated}`,
   });
@@ -88,4 +70,9 @@ async function uploadInspectionData(request, response) {
 router.get("/getInspectionList", getInspectionList);
 router.post("/upload", uploadInspectionData);
 
-module.exports = router;
+function routerSetup(db) {
+  database = db;
+  return router;
+}
+
+module.exports = routerSetup;
