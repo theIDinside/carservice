@@ -10,6 +10,7 @@ db.mongoose
   .connect(process.env.MDBURI || "mongodb://localhost:27017/carservice", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 1000,
   })
   .then(() => {
     console.log("Ansluten till MongoDB: OK!");
@@ -24,7 +25,6 @@ db.mongoose
     };
     // use cors options
     app.use(cors(corsOptions));
-
     app.use("/api/vehicles", vehicles);
     // listening port
     const PORT = process.env.PORT || 8000;
