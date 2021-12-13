@@ -1,6 +1,5 @@
 // Typ... REST api / end points. skulle kunna kalla det för "funktioner" också eller methods. Dvs, client application anropar dessa endpoints
 // och vi ger tillbaka den datan som efterfrågas. Dessa funktioner exponeras sedan till backend servern
-const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
@@ -9,16 +8,15 @@ const db = require("../models");
 const Vehicle = db.vehicle;
 
 function getInspectionList(request, response) {
-  db.vehicle.find({}).then((collection) => {
-    const responseData = collection.map((vehicle) => {
-      return {
-        chassi: vehicle.chassiSerialNumber,
-        prevInspection: vehicle.prevInspection,
-        nextInspection: vehicle.nextInspection,
-      };
+  let r = [];
+  db.forEach((vehicle) => {
+    r.push({
+      chassi: vehicle.chassiSerialNumber,
+      prevInspection: vehicle.prevInspection,
+      nextInspection: vehicle.nextInspection,
     });
-    response.json(responseData);
   });
+  response.json(r);
 }
 
 async function uploadInspectionData(request, response) {
@@ -31,10 +29,31 @@ async function uploadInspectionData(request, response) {
   let newvehicles = [];
   let updated = 0;
   let created = 0;
+  let isIdentical = false;
   for (let vehicle of request.body.contents) {
-    const item = await db.vehicle.findById(vehicle.identity);
-    if (!item) {
-      newvehicles.push({
+    if (db.has(vehicle.identity)) {
+      const entry = db.get(vehicle.identity);
+      isIdentical =
+        entry._id == vehicle.identity &&
+        entry.chassiSerialNumber == vehicle.chassi &&
+        entry.yearModel == vehicle.model &&
+        entry.typeApproval == vehicle.approval &&
+        entry.firstRegistration == vehicle.firstRegistration &&
+        entry.privateImport == vehicle.privateImport &&
+        entry.deregistrationDate == vehicle.deregistered &&
+        entry.color == vehicle.color &&
+        entry.prevInspection == vehicle.prevInspection &&
+        entry.nextInspection == vehicle.nextInspection &&
+        entry.previousRegistration == vehicle.prevRegistration &&
+        entry.monthRegistration == vehicle.monthRegistration;
+      if (!isIdentical) {
+        updated++;
+      }
+    } else {
+      created++;
+    }
+    if (!isIdentical) {
+      db.set(vehicle.identity, {
         _id: vehicle.identity,
         chassiSerialNumber: vehicle.chassi,
         yearModel: vehicle.model,
@@ -48,37 +67,9 @@ async function uploadInspectionData(request, response) {
         previousRegistration: vehicle.prevRegistration,
         monthRegistration: vehicle.monthRegistration,
       });
-    } else {
-      await item
-        .updateOne({
-          $set: {
-            _id: vehicle.identity,
-            chassiSerialNumber: vehicle.chassi,
-            yearModel: vehicle.model,
-            typeApproval: vehicle.approval,
-            firstRegistration: vehicle.firstRegistration,
-            privateImport: vehicle.privateImport,
-            deregistrationDate: vehicle.deregistered,
-            color: vehicle.color,
-            prevInspection: vehicle.prevInspection,
-            nextInspection: vehicle.nextInspection,
-            previousRegistration: vehicle.prevRegistration,
-            monthRegistration: vehicle.monthRegistration,
-          },
-        })
-        .then((r) => {
-          if (r.modifiedCount != 0) updated++;
-        });
     }
+    isIdentical = false;
   }
-
-  await Vehicle.insertMany(newvehicles)
-    .then((r) => {
-      created += r.length;
-    })
-    .catch((err) => {
-      console.log(`Failed to create documents: ${err}`);
-    });
 
   response.json({
     message: `Besiktningsdata hanterad. Nya fordon: ${created}. Updaterade fordon: ${updated}`,

@@ -1,8 +1,2 @@
-const mongoose = require("mongoose");
-
-const db = {
-  mongoose: mongoose,
-  vehicle: require("./vehicle"), // the Vehicle schema
-};
-
+const db = new Map();
 module.exports = db;
