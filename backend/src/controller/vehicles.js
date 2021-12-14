@@ -2,6 +2,7 @@
 // och vi ger tillbaka den datan som efterfrågas. Dessa funktioner exponeras sedan till backend servern
 const express = require("express");
 const router = express.Router();
+// här är där vi injicerar vilken databas-implementation som skall användas. Detta görs från backend/index.js
 let database;
 
 function getInspectionList(request, response) {
